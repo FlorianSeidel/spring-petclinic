@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
 
@@ -25,13 +25,14 @@ import java.util.Locale;
 public class WebConfiguration implements WebMvcConfigurer {
 
 	/**
-	 * Uses session storage to remember the user’s language setting across requests.
-	 * Defaults to English if nothing is specified.
-	 * @return session-based {@link LocaleResolver}
+	 * Stores the user's language preference in a client-side cookie. No locale state is
+	 * retained in the application process or HTTP session, so requests remain portable
+	 * across replicas. Defaults to English if nothing is specified.
+	 * @return cookie-based {@link LocaleResolver}
 	 */
 	@Bean
 	public LocaleResolver localeResolver() {
-		SessionLocaleResolver resolver = new SessionLocaleResolver();
+		CookieLocaleResolver resolver = new CookieLocaleResolver("petclinic-locale");
 		resolver.setDefaultLocale(Locale.ENGLISH);
 		return resolver;
 	}

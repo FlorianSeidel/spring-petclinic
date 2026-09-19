@@ -13,6 +13,10 @@ This repository is deployed through the shared Nordhelm delivery model:
 - `application.properties` requires database credentials and the HTTP port
   from the environment, emits structured JSON to stdout, and disables all
   boot-time SQL initialization and in-process TLS.
+- `WebConfiguration` keeps locale preference in a client-side cookie rather
+  than an application HTTP session, so replicas retain no request state.
+- Local Docker Compose configuration also requires credentials from the caller;
+  it contains no password value or empty-password fallback.
 
 No raw Kubernetes manifest, committed Secret, NodePort, environment-specific
 profile, or per-instance deployment hook is part of the production path.
