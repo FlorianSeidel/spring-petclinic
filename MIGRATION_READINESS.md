@@ -10,9 +10,10 @@ This repository is deployed through the shared Nordhelm delivery model:
 - `.github/workflows/platform-delivery.yml` builds and scans one image per
   commit, executes `deploy/migrations/V001__petclinic_schema.sql` before
   rollout, and promotes the same immutable digest through environments.
-- `application.properties` requires database credentials and the HTTP port
-  from the environment, emits structured JSON to stdout, and disables all
-  boot-time SQL initialization and in-process TLS.
+- `deploy/nordhelm-values.yaml` injects every Spring runtime setting as an
+  environment variable. No application profile or runtime configuration file
+  is baked into the image. The injected settings emit structured JSON to
+  stdout and disable boot-time SQL initialization and in-process TLS.
 - `WebConfiguration` keeps locale preference in a client-side cookie rather
   than an application HTTP session, so replicas retain no request state.
 - Local Docker Compose configuration also requires credentials from the caller;

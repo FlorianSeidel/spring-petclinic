@@ -64,7 +64,8 @@ Our issue tracker is available [here](https://github.com/spring-projects/spring-
 Petclinic requires its PostgreSQL connection and listener configuration from
 the environment. There are no database profiles or committed credential
 defaults. Schema migration is a separate delivery-pipeline step and never runs
-on application startup.
+on application startup. Production supplies every Spring runtime setting from
+`deploy/nordhelm-values.yaml`; the image contains no runtime configuration file.
 
 For local development, export nonempty values for `POSTGRES_USER`,
 `POSTGRES_PASSWORD`, and `POSTGRES_DB`, then start PostgreSQL with Docker:
@@ -137,7 +138,7 @@ The following items should be installed in your system:
 |Spring Boot Configuration | Class or Java property files  |
 |--------------------------|---|
 |The Main Class | [PetClinicApplication](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/PetClinicApplication.java) |
-|Properties Files | [application.properties](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources) |
+|Runtime configuration | [`deploy/nordhelm-values.yaml`](deploy/nordhelm-values.yaml) environment injection |
 |Caching | [CacheConfiguration](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/system/CacheConfiguration.java) |
 
 ## Interesting Spring Petclinic branches and forks

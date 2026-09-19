@@ -17,12 +17,50 @@ container:
     environmentVariable: PORT
 
 environment:
+  PORT:
+    value: "8080"
   SPRING_DATASOURCE_URL:
     secretKey: url
   SPRING_DATASOURCE_USERNAME:
     secretKey: username
   SPRING_DATASOURCE_PASSWORD:
     secretKey: password
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME:
+    value: org.postgresql.Driver
+  SPRING_SQL_INIT_MODE:
+    value: never
+  SPRING_JPA_HIBERNATE_DDL_AUTO:
+    value: none
+  SPRING_JPA_OPEN_IN_VIEW:
+    value: "false"
+  SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY:
+    value: org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl
+  SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_BATCH_FETCH_SIZE:
+    value: "16"
+  SPRING_THYMELEAF_MODE:
+    value: HTML
+  SPRING_MESSAGES_BASENAME:
+    value: messages/messages
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:
+    value: health,info
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED:
+    value: "true"
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ADD_ADDITIONAL_PATHS:
+    value: "true"
+  MANAGEMENT_ENDPOINT_HEALTH_GROUP_LIVENESS_INCLUDE:
+    value: livenessState,ping
+  MANAGEMENT_ENDPOINT_HEALTH_GROUP_READINESS_INCLUDE:
+    value: readinessState,db
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK:
+    value: INFO
+  LOGGING_STRUCTURED_FORMAT_CONSOLE:
+    value: logstash
+  LOGGING_STRUCTURED_JSON_ADD_SERVICE:
+    value: petclinic
+  SERVER_SSL_ENABLED:
+    value: "false"
+  SPRING_WEB_RESOURCES_CACHE_CACHECONTROL_MAX_AGE:
+    value: 12h
 
 secrets:
   provider: secrets-store-csi
