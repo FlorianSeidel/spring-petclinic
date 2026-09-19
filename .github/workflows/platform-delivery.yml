@@ -1,0 +1,19 @@
+name: Platform delivery
+
+on:
+  push:
+    branches: [main]
+
+# The shared workflow builds and scans one image per commit, runs the database
+# migration before rollout, and promotes the identical immutable digest through
+# every environment. It never configures a running instance.
+jobs:
+  build-migrate-promote:
+    uses: nordhelm/platform-pipelines/.github/workflows/java-service.yml@v1
+    with:
+      image_name: petclinic
+      dockerfile: Dockerfile
+      helm_values: deploy/nordhelm-values.yaml
+      promotion_mode: same-image-digest
+      migration_command: psql --file deploy/migrations/V001__petclinic_schema.sql
+    secrets: inherit

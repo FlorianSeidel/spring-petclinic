@@ -1,0 +1,56 @@
+# Application-owned values for the platform's nordhelm-base chart.
+baseChart:
+  name: nordhelm-base
+  version: 3.8.0
+
+image:
+  repository: registry.nordhelm.example/petclinic
+  # Injected by the shared pipeline. Environments promote this same digest.
+  digest: ${IMAGE_DIGEST}
+
+container:
+  runAsNonRoot: true
+  runAsUser: 10001
+  port:
+    name: http
+    value: 8080
+    environmentVariable: PORT
+
+environment:
+  SPRING_DATASOURCE_URL:
+    secretKey: url
+  SPRING_DATASOURCE_USERNAME:
+    secretKey: username
+  SPRING_DATASOURCE_PASSWORD:
+    secretKey: password
+
+secrets:
+  provider: secrets-store-csi
+  secretProviderClass:
+    generatedByBaseChart: true
+    provider: aws
+    objectName: /petclinic/database
+  projectToEnvironment: true
+
+observability:
+  openTelemetry:
+    injectJavaAgent: true
+    exporterEndpoint: http://adot-collector.observability.svc:4317
+    serviceName: petclinic
+
+probes:
+  liveness:
+    path: /livez
+    port: http
+  readiness:
+    path: /readyz
+    port: http
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: alb
+  tlsTermination: ingress
