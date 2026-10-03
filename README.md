@@ -42,18 +42,24 @@ See below for more details.
 
 ## Building a Container
 
-There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
+Build the jar and its OCI image for the local demo platform:
 
 ```bash
-./mvnw spring-boot:build-image
+./mvnw package
+docker build -t petclinic:local .
 ```
 
 ## Running the Container Image
 
 ```bash
-docker images | grep petclinic
-docker run -p 8080:8080 docker.io/library/spring-petclinic:latest
+docker run --rm -p 8080:8080 petclinic:local
 ```
+
+The demo platform's Jenkins pipeline builds this Dockerfile from a pinned source
+commit, pushes the image to its local registry, and promotes the resulting
+digest to its Argo CD GitOps repository. The platform owns the Deployment,
+Service, Ingress, CloudNativePG database, and database credential Secret.
+Do not deploy application-owned Kubernetes manifests from this repository.
 
 ## In case you find a bug/suggested improvement for Spring Petclinic
 
@@ -65,7 +71,7 @@ In its default configuration, Petclinic uses an in-memory database (H2) which
 gets populated at startup with data. The h2 console is exposed at `http://localhost:8080/h2-console`,
 and it is possible to inspect the content of the database using the `jdbc:h2:mem:<uuid>` URL. The UUID is printed at startup to the console.
 
-A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Note that whenever the database type changes, the app needs to run with a different profile: `spring.profiles.active=mysql` for MySQL or `spring.profiles.active=postgres` for PostgreSQL. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on how to set the active profile.
+A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Select `spring.profiles.active=mysql` or `spring.profiles.active=postgres` as appropriate. The PostgreSQL profile requires `POSTGRES_URL`, `POSTGRES_USER`, and `POSTGRES_PASS`; it never initializes the database at application startup. The demo platform supplies `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` from its CloudNativePG service and operator-managed Secret. Its Argo CD PreSync Job applies the checked-in PostgreSQL schema and seed SQL before the application rollout. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on profiles.
 
 You can start MySQL or PostgreSQL locally with whatever installer works for your OS or use docker:
 
@@ -96,7 +102,7 @@ docker compose up postgres
 
 ## Test Applications
 
-At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MySqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container, and the Postgres tests use Docker Compose to do the same thing.
+At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MySqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container. The Postgres tests use Docker Compose and explicitly apply the schema and seed SQL before testing the application.
 
 ## Compiling the CSS
 
