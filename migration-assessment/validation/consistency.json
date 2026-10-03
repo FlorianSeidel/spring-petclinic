@@ -1,0 +1,81 @@
+{
+  "runs": [
+    "petclinic-actions-c-20260923",
+    "petclinic-actions-d-20260923"
+  ],
+  "profile": {
+    "model": "gpt-6-sol",
+    "reasoning_effort": "high"
+  },
+  "inputs_match": true,
+  "application_commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+  "platform_tree": "d68124ca315d1c15b874bf03c1f0d88c09cd5493",
+  "application_effort": [
+    18,
+    18
+  ],
+  "application_paths": {
+    "petclinic-actions-c-20260923": [
+      ".github/workflows/deploy-and-test-cluster.yml",
+      "Dockerfile",
+      "README.md",
+      "k8s/db.yml",
+      "k8s/petclinic.yml",
+      "src/main/resources/application-postgres.properties",
+      "src/main/resources/application.properties",
+      "src/test/java/org/springframework/samples/petclinic/PlatformHealthIntegrationTests.java",
+      "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java"
+    ],
+    "petclinic-actions-d-20260923": [
+      ".github/workflows/deploy-and-test-cluster.yml",
+      "Dockerfile",
+      "README.md",
+      "k8s/db.yml",
+      "k8s/petclinic.yml",
+      "src/main/resources/application-postgres.properties",
+      "src/main/resources/application.properties",
+      "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+      "src/test/java/org/springframework/samples/petclinic/system/HealthProbeIntegrationTests.java"
+    ]
+  },
+  "rule_verdicts": {
+    "spring-petclinic:petclinic-actions-c-20260923": {
+      "DP-01": "fail",
+      "DP-02": "fail",
+      "DP-03": "fail",
+      "DP-04": "fail",
+      "DP-05": "fail",
+      "DP-06": "fail",
+      "DP-07": "fail",
+      "DP-08": "fail",
+      "DP-09": "fail"
+    },
+    "spring-petclinic:petclinic-actions-d-20260923": {
+      "DP-01": "fail",
+      "DP-02": "fail",
+      "DP-03": "fail",
+      "DP-04": "fail",
+      "DP-05": "fail",
+      "DP-06": "fail",
+      "DP-07": "fail",
+      "DP-08": "fail",
+      "DP-09": "fail"
+    }
+  },
+  "migration_paths": [
+    ".github/workflows/deploy-and-test-cluster.yml",
+    "Dockerfile",
+    "README.md",
+    "k8s/db.yml",
+    "k8s/petclinic.yml",
+    "src/main/resources/application-postgres.properties",
+    "src/main/resources/application.properties",
+    "src/test/java/org/springframework/samples/petclinic/PlatformHealthIntegrationTests.java",
+    "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java"
+  ],
+  "interpretation": "Stable rule verdicts and effort; health-test placement differs. Migration was guided by run C. Path agreement establishes plan executability for this experiment, not an independent minimum-effort oracle.",
+  "original_summary_sha256": {
+    "petclinic-actions-c-20260923": "6e4c91428d387c5c38bc2343abd1957630fb52dc88976848349497c0cc827f87",
+    "petclinic-actions-d-20260923": "10105c97748bfa12b15dc736d5e6e7671cc2c010b9e075c526c48012218e9ad1"
+  }
+}

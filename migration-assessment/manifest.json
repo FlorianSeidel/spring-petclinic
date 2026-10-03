@@ -1,0 +1,36 @@
+{
+  "application": {
+    "app_id": "spring-petclinic",
+    "commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+    "repo": "https://github.com/FlorianSeidel/spring-petclinic",
+    "tree": "0bb31bb92bc1839f6378e832e54c8b4af03e4ee2"
+  },
+  "budget_sha256": "da173d97e8aaba5be43ed4c81fec86fdc5e1b8094ec0eb59c54796028351a289",
+  "contract_sha256": "0e5e0aba1a508f9261ceeff6f016cc7d581f1a17d31461f3e24a09ddd2bc14d1",
+  "created_at": "2026-09-23T16:05:29.780936+00:00",
+  "platform": {
+    "docs": [
+      {
+        "path": "README.md",
+        "sha256": "8ba06f5d0c2d69a689cbeab4d33289786d69f29fa7146a8e9895b5745d581898"
+      },
+      {
+        "path": "contract/PLATFORM-CONTRACT.md",
+        "sha256": "9bf558d6acc4708e7ef5fd311dafec62cf1bde2598e68f99a742d8420bbd2eb7"
+      }
+    ],
+    "revision": "d4445f05b67884005742b9ab3e1a839542b973fc",
+    "root": "demo-platform (original local path omitted for publication)",
+    "tree": "d68124ca315d1c15b874bf03c1f0d88c09cd5493"
+  },
+  "profile": {
+    "model": "gpt-6-sol",
+    "reasoning_effort": "high"
+  },
+  "prompt_sha256": "4c0d4652563905d68f5f469ca3c11868bc3de46f70dd4e1aa2380f9ecdba696b",
+  "register_sha256": "3a0e66556bfabb3595cf667b01b959497047dfba10b5364ebda893ecee200269",
+  "run_id": "petclinic-actions-c-20260923",
+  "schema_sha256": "e6b8f0bb06f9aaca8a1e3d7f73f2f66baeb528505ad7265fb798ea3137d52bb0",
+  "schema_version": "2.0",
+  "web_search": "live"
+}

@@ -1,0 +1,99 @@
+pipeline {
+  agent {
+    kubernetes {
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: git
+      image: alpine/git:v2.49.1
+      command: ["sleep"]
+      args: ["999999"]
+    - name: maven
+      image: maven:3.9.11-eclipse-temurin-17
+      command: ["sleep"]
+      args: ["999999"]
+    - name: docker
+      image: docker:27-cli
+      command: ["sleep"]
+      args: ["999999"]
+      env:
+        - name: DOCKER_HOST
+          value: tcp://127.0.0.1:2375
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+    - name: dind
+      image: docker:27-dind
+      securityContext:
+        privileged: true
+      command: ["dockerd"]
+      args: ["--host=tcp://127.0.0.1:2375", "--insecure-registry=demo-platform-registry:5000"]
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+'''
+    }
+  }
+  options { timeout(time: 45, unit: 'MINUTES') }
+  parameters {
+    string(name: 'TARGET_SHA', defaultValue: '11d63489627339193929ba14268a8db646dbb1e5', description: 'Pinned source commit')
+  }
+  environment {
+    REGISTRY = 'demo-platform-registry:5000'
+    SOURCE_REPO = 'https://github.com/FlorianSeidel/spring-petclinic.git'
+    GITOPS_REPO = 'git://git.demo-platform.svc.cluster.local/platform.git'
+  }
+  stages {
+    stage('Checkout pinned source') {
+      steps {
+        container('git') {
+          sh '''git clone "$SOURCE_REPO" source
+git -C source checkout --detach "$TARGET_SHA"
+test "$(git -C source rev-parse HEAD)" = "$TARGET_SHA"
+'''
+        }
+      }
+    }
+    stage('Package') {
+      steps {
+        container('maven') {
+          sh 'cd source && sh ./mvnw -B -DskipTests -Dcheckstyle.skip package'
+        }
+      }
+    }
+    stage('Build and push image') {
+      steps {
+        container('docker') {
+          sh '''
+set -eu
+until docker info >/dev/null 2>&1; do sleep 2; done
+docker build -t "$REGISTRY/petclinic:$TARGET_SHA" source
+docker push "$REGISTRY/petclinic:$TARGET_SHA"
+docker image inspect --format='{{index .RepoDigests 0}}' "$REGISTRY/petclinic:$TARGET_SHA" > image.txt
+grep -Eq '^.+@sha256:[0-9a-f]{64}$' image.txt
+'''
+        }
+      }
+    }
+    stage('Promote digest through GitOps') {
+      steps {
+        container('git') {
+          sh '''
+set -eu
+git clone "$GITOPS_REPO" gitops
+IMAGE=$(cat image.txt)
+sed -i "s|image: .*petclinic@sha256:.*|image: $IMAGE|" gitops/petclinic/deployment.yaml
+git -C gitops config user.name 'Demo Platform Jenkins'
+git -C gitops config user.email 'jenkins@demo-platform.localhost'
+git -C gitops add petclinic/deployment.yaml
+if ! git -C gitops diff --cached --quiet; then
+  git -C gitops commit -m "Promote Petclinic $TARGET_SHA by digest"
+  git -C gitops push origin main
+fi
+'''
+        }
+      }
+    }
+  }
+}

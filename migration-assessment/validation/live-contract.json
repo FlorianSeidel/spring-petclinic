@@ -1,0 +1,90 @@
+{
+  "contract_version": "demo-platform-2.1",
+  "app_id": "spring-petclinic",
+  "assessed_commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+  "git_revision": "694ca2ae71b1f36bb1535ffc02847ab1c3e7b10f",
+  "image": "demo-platform-registry:5000/petclinic@sha256:c766739095e5b0d5ed0b2012b6bec9e53ed74d8f8404941076f8fcb36e5ea956",
+  "rules": [
+    {
+      "id": "DP-01",
+      "requirement": "Jenkins builds an OCI image from a pinned source commit, pushes it to the local registry, and the application Deployment uses its sha256 digest.",
+      "observed": "pass",
+      "reason": "deployed image: demo-platform-registry:5000/petclinic@sha256:c766739095e5b0d5ed0b2012b6bec9e53ed74d8f8404941076f8fcb36e5ea956; pinned-source registry digest: sha256:c766739095e5b0d5ed0b2012b6bec9e53ed74d8f8404941076f8fcb36e5ea956",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-02",
+      "requirement": "Application pods run as non-root with no privilege escalation and a read-only root filesystem.",
+      "observed": "pass",
+      "reason": "pod and container securityContext",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-03",
+      "requirement": "The application has one HTTP service port, uses a ClusterIP Service, and is routed by the platform Traefik Ingress.",
+      "observed": "pass",
+      "reason": "ClusterIP, Traefik Ingress, and HTTP / check",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-04",
+      "requirement": "The application exposes separate liveness and readiness probes; readiness checks its PostgreSQL dependency.",
+      "observed": "pass",
+      "reason": "separate livez and readyz returned HTTP 200",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-05",
+      "requirement": "Relational data uses the CloudNativePG provisioned PostgreSQL service and application credentials from the operator-generated Secret.",
+      "observed": "pass",
+      "reason": "CloudNativePG readiness and application DB wiring",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-06",
+      "requirement": "Schema and seed SQL run as an Argo CD PreSync Job before the application rolls, with startup DDL disabled.",
+      "observed": "pass",
+      "reason": "PreSync Job completion and disabled startup DDL",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-07",
+      "requirement": "Application credentials are supplied by a platform-generated Kubernetes Secret or a SealedSecret; no plaintext credential is committed to GitOps manifests.",
+      "observed": "pass",
+      "reason": "operator Secret references and tracked manifests",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-08",
+      "requirement": "Jenkins updates the internal Git repository by image digest and Argo CD reports the application Synced and Healthy at that revision.",
+      "observed": "pass",
+      "reason": "Argo CD sync=Synced, health=Healthy, revision=694ca2ae71b1f36bb1535ffc02847ab1c3e7b10f, image reported=True",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    },
+    {
+      "id": "DP-09",
+      "requirement": "Every application container declares CPU and memory requests so it can be scheduled predictably.",
+      "observed": "pass",
+      "reason": "container CPU and memory requests",
+      "predicted": "fail",
+      "prediction_matches": false,
+      "prediction_outcome": "resolved"
+    }
+  ]
+}
