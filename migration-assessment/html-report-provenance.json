@@ -1,0 +1,16 @@
+{
+  "run_id": "demo-before-sol-medium-20260920",
+  "application_commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+  "contract_version": "1.2",
+  "format": "original staged-pipeline output, copied without modification",
+  "artifacts": {
+    "report.html": {
+      "pipeline_output": "runs/demo-before-sol-medium-20260920/worktrees/spring-petclinic/report.html",
+      "sha256": "cd67c86d6ead8b41113bd67cab53a76a287f1afef76b8ab98bcf5af62d6546ba"
+    },
+    "pipeline-summary.json": {
+      "pipeline_output": "runs/demo-before-sol-medium-20260920/worktrees/spring-petclinic/repo-summary.json",
+      "sha256": "15b6d12161fc780b32b2fa8401a11b3dacea59f61c3b932793f2b83bc9af45d6"
+    }
+  }
+}

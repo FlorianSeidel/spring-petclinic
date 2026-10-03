@@ -4,6 +4,10 @@ This assessment supplies a reviewable migration plan for the historical Petclini
 
 ## Review in this order
 
+For the browser demo, open the original [HTML app report](report.html). Download the file and open it in a browser; GitHub displays HTML source rather than executing the page. The report is self-contained and includes clickable evidence links and expandable findings.
+
+This HTML is the unchanged pipeline output from `demo-before-sol-medium-20260920`, assessing the same `818c4136` application commit under the earlier staged pipeline and contract **1.2**. Its original metrics and model provenance belong to that run. [pipeline-summary.json](pipeline-summary.json) is its matching original data; [html-report-provenance.json](html-report-provenance.json) records source paths and hashes. The single-pass local-platform assessment below uses a different contract and effort method; its effort **18** must not be attributed to the older HTML report.
+
 1. [Report: findings, ownership, changes, and success criteria](report.md)
 2. [Evidence: immutable application citations and pinned platform snapshots](evidence.md)
 3. [Summary: deterministic classification, effort, file actions, and evidence](summary.json)
