@@ -38,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.HttpStatus;
@@ -45,12 +46,15 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.DockerClientFactory;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = { "spring.docker.compose.skip.in-tests=false", //
 		"spring.docker.compose.start.arguments=--force-recreate,--renew-anon-volumes,postgres" })
 @ActiveProfiles("postgres")
+@Sql(scripts = { "classpath:db/postgres/schema.sql", "classpath:db/postgres/data.sql" },
+		executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @DisabledInNativeImage
 public class PostgresIntegrationTests {
 
@@ -62,6 +66,9 @@ public class PostgresIntegrationTests {
 
 	@Autowired
 	private RestTemplateBuilder builder;
+
+	@Autowired
+	private Environment environment;
 
 	@BeforeAll
 	static void available() {
@@ -76,6 +83,11 @@ public class PostgresIntegrationTests {
 			) //
 			.listeners(new PropertiesLogger()) //
 			.run(args);
+	}
+
+	@Test
+	void applicationDoesNotInitializePlatformDatabase() {
+		assertThat(environment.getProperty("spring.sql.init.mode")).isEqualTo("never");
 	}
 
 	@Test
