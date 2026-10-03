@@ -42,7 +42,9 @@ See below for more details.
 
 ## Building a Container
 
-There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
+The existing `Dockerfile` uses a pinned Java 17 runtime and non-root user. The selected platform Jenkins job packages the JAR, builds once, and promotes the immutable image digest through internal Git and Argo CD. See [migration readiness](MIGRATION_READINESS.md).
+
+For an optional local development image, use the Spring Boot build plugin:
 
 ```bash
 ./mvnw spring-boot:build-image
@@ -65,7 +67,7 @@ Petclinic requires its PostgreSQL connection and listener configuration from
 the environment. There are no database profiles or committed credential
 defaults. Schema migration is a separate delivery-pipeline step and never runs
 on application startup. Production supplies every Spring runtime setting from
-`deploy/nordhelm-values.yaml`; the image contains no runtime configuration file.
+the selected platform `migrations/petclinic/deployment.yaml`, including CNPG-generated Secret references; the image contains no environment-specific runtime configuration file. The PreSync Job applies both platform schema and fixture SQL before startup.
 
 For local development, export nonempty values for `POSTGRES_USER`,
 `POSTGRES_PASSWORD`, and `POSTGRES_DB`, then start PostgreSQL with Docker:
@@ -138,7 +140,7 @@ The following items should be installed in your system:
 |Spring Boot Configuration | Class or Java property files  |
 |--------------------------|---|
 |The Main Class | [PetClinicApplication](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/PetClinicApplication.java) |
-|Runtime configuration | [`deploy/nordhelm-values.yaml`](deploy/nordhelm-values.yaml) environment injection |
+|Runtime configuration | Selected platform `migrations/petclinic/deployment.yaml` environment injection (see [handoff](MIGRATION_READINESS.md)) |
 |Caching | [CacheConfiguration](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/system/CacheConfiguration.java) |
 
 ## Interesting Spring Petclinic branches and forks

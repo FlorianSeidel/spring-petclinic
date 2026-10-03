@@ -1,6 +1,9 @@
 package org.springframework.samples.petclinic.system;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -23,6 +26,19 @@ import java.util.Locale;
 @Configuration
 @SuppressWarnings("unused")
 public class WebConfiguration implements WebMvcConfigurer {
+
+	/**
+	 * The bundle path is an application resource invariant. Operators can override it
+	 * through SPRING_MESSAGES_BASENAME; no environment-specific profile is embedded.
+	 */
+	@Bean
+	public MessageSource messageSource(Environment environment) {
+		ResourceBundleMessageSource source = new ResourceBundleMessageSource();
+		source.setBasenames(environment.getProperty("spring.messages.basename", "messages/messages").split(","));
+		source.setDefaultEncoding("UTF-8");
+		source.setFallbackToSystemLocale(false);
+		return source;
+	}
 
 	/**
 	 * Stores the user's language preference in a client-side cookie. No locale state is

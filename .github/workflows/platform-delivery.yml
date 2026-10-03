@@ -1,19 +1,19 @@
-name: Platform delivery
+name: Platform delivery handoff
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
-# The shared workflow builds and scans one image per commit, runs the database
-# migration before rollout, and promotes the identical immutable digest through
-# every environment. It never configures a running instance.
+permissions:
+  contents: read
+
 jobs:
-  build-migrate-promote:
-    uses: nordhelm/platform-pipelines/.github/workflows/java-service.yml@v1
-    with:
-      image_name: petclinic
-      dockerfile: Dockerfile
-      helm_values: deploy/nordhelm-values.yaml
-      promotion_mode: same-image-digest
-      migration_command: psql --file deploy/migrations/V001__petclinic_schema.sql
-    secrets: inherit
+  handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select the existing platform pipeline
+        env:
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          echo "Submit TARGET_SHA=$TARGET_SHA to the existing Jenkins petclinic job."
+          echo "Jenkins packages and builds once; internal Git and Argo CD promote its digest."
+          echo "This informational workflow does not build, migrate, or deploy the application."
