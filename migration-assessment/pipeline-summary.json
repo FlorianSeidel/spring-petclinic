@@ -1,0 +1,669 @@
+{
+  "app_id": "spring-petclinic",
+  "applicable_pc_rule_count": 13,
+  "assurance_metrics": {
+    "certification": {
+      "certification_eligible": 0,
+      "certification_submitted": 0,
+      "certification_succeeded": 0,
+      "reconciled_claims": 0,
+      "terminal_evidence_unresolved": 8
+    },
+    "challenge": {
+      "agreements": 0,
+      "completed_challenges": 0,
+      "eligible": 0,
+      "reconciled": 0,
+      "valid_challenges": 0
+    }
+  },
+  "blocker_histogram": [
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-03"
+      ],
+      "rule_id": "PC-03"
+    },
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-13"
+      ],
+      "rule_id": "PC-13"
+    },
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-21"
+      ],
+      "rule_id": "PC-21"
+    },
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-40"
+      ],
+      "rule_id": "PC-40"
+    },
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-50"
+      ],
+      "rule_id": "PC-50"
+    },
+    {
+      "count": 1,
+      "finding_ids": [
+        "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-51"
+      ],
+      "rule_id": "PC-51"
+    }
+  ],
+  "calibration_version": "1.1.0",
+  "category_trace": {
+    "migration_ready_sizes": [
+      "XS",
+      "S"
+    ],
+    "platform_blocking_decision_refs": [],
+    "precedence": [
+      "blocked_by_platform",
+      "migration_ready",
+      "migration_needs_work"
+    ],
+    "repo_size_is_ready": false,
+    "verif_cut": 0.5,
+    "verifiability_is_ready": false
+  },
+  "certified_counts": {
+    "conformance": 0,
+    "verifiability": 0
+  },
+  "citation_metrics": {
+    "redacted": 0,
+    "total": 21,
+    "unresolved": 0,
+    "verified": 21
+  },
+  "commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+  "contract_version": "1.2",
+  "decisions_raised": [],
+  "findings": [
+    {
+      "blocked_on_decision": false,
+      "category": "runtime",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 49,
+          "excerpt": "## Building a Container\n\nThere is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:\n\n```bash\n./mvnw spring-boot:build-image\n```",
+          "path": "README.md",
+          "start_line": 43
+        }
+      ],
+      "rationale": "The repository declares a Spring Boot build-image workflow that produces a container image from the repository; this is an equivalent OCI build definition even though there is no application Dockerfile.",
+      "rule_id": "PC-01",
+      "size": null,
+      "size_trace": null,
+      "verdict": "pass",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "runtime",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [],
+      "rationale": "The previous/model finding could not be retained because its current-source evidence did not pass deterministic citation validation.",
+      "rule_id": "PC-02",
+      "size": null,
+      "size_trace": null,
+      "verdict": "undetermined",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "runtime",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "# database init, supports mysql too\ndatabase=mysql\nspring.datasource.url=${MYSQL_URL:jdbc:mysql://localhost/petclinic}\nspring.datasource.username=${MYSQL_USER:petclinic}\nspring.datasource.password=${MYSQL_PASS:petclinic}\n# SQL is written to be idempotent so this is safe\nspring.sql.init.mode=always",
+          "path": "src/main/resources/application-mysql.properties",
+          "start_line": 1
+        },
+        {
+          "end_line": 7,
+          "excerpt": "# database init, supports postgres too\ndatabase=postgres\nspring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}\nspring.datasource.username=${POSTGRES_USER:petclinic}\nspring.datasource.password=${POSTGRES_PASS:petclinic}\n# SQL is written to be idempotent so this is safe\nspring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "start_line": 1
+        },
+        {
+          "end_line": 43,
+          "excerpt": "        - name: workload\n          image: dsyer/petclinic\n          env:\n            - name: SPRING_PROFILES_ACTIVE\n              value: postgres\n            - name: SERVICE_BINDING_ROOT\n              value: /bindings\n            - name: SPRING_APPLICATION_JSON\n              value: |\n                {\n                  \"management.endpoint.health.probes.add-additional-paths\": true\n                }",
+          "path": "k8s/petclinic.yml",
+          "start_line": 32
+        }
+      ],
+      "rationale": "Two profile-specific configuration files ship with distinct MySQL and PostgreSQL configuration, and the deployment selects the postgres profile. The artifact therefore varies its configuration through baked-in profiles.",
+      "rule_id": "PC-03",
+      "size": "M",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-03"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "config_only",
+            "crosses_model_boundary": "none",
+            "files_changed": "4-8",
+            "mechanical_path": false,
+            "new_artefact_required": null,
+            "tests_required": "extend"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 4
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Add negative and positive startup tests for required external datasource configuration and assert that profile-specific files and deployment profile selection are absent.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "The application contains no MySQL or PostgreSQL profile-specific datasource configuration and the deployment does not set SPRING_PROFILES_ACTIVE; startup fails clearly when required external datasource values are absent and succeeds against a disposable database when those values are supplied.",
+        "terminal_undetermined": true
+      }
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "data",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 5,
+          "excerpt": "database=postgres\nspring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}\nspring.datasource.username=${POSTGRES_USER:petclinic}\nspring.datasource.password=${POSTGRES_PASS:petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "start_line": 2
+        },
+        {
+          "end_line": 36,
+          "excerpt": "      containers:\n        - name: workload\n          image: dsyer/petclinic\n          env:\n            - name: SPRING_PROFILES_ACTIVE\n              value: postgres",
+          "path": "k8s/petclinic.yml",
+          "start_line": 31
+        }
+      ],
+      "rationale": "The deployed Kubernetes workload activates the postgres profile, whose datasource URL uses the PostgreSQL JDBC scheme. PostgreSQL is an Aurora-compatible permitted engine family.",
+      "rule_id": "PC-10",
+      "size": null,
+      "size_trace": null,
+      "verdict": "pass",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "data",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [],
+      "rationale": "Not applicable: no key-value or document datastore client or construction site was found in the repository source.",
+      "rule_id": "PC-11",
+      "size": null,
+      "size_trace": null,
+      "verdict": "not_applicable",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "data",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [],
+      "rationale": "Not applicable: no blob, upload, generated-document, object-storage client, or storage mount configuration was found in the repository source.",
+      "rule_id": "PC-12",
+      "size": null,
+      "size_trace": null,
+      "verdict": "not_applicable",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "data",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 4,
+          "excerpt": "database=h2\nspring.sql.init.schema-locations=classpath*:db/${database}/schema.sql\nspring.sql.init.data-locations=classpath*:db/${database}/data.sql",
+          "path": "src/main/resources/application.properties",
+          "start_line": 2
+        },
+        {
+          "end_line": 7,
+          "excerpt": "# database init, supports postgres too\ndatabase=postgres\nspring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}\nspring.datasource.username=${POSTGRES_USER:petclinic}\nspring.datasource.password=${POSTGRES_PASS:petclinic}\n# SQL is written to be idempotent so this is safe\nspring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "start_line": 1
+        },
+        {
+          "end_line": 6,
+          "excerpt": "CREATE TABLE IF NOT EXISTS vets (\n  id         INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,\n  first_name TEXT,\n  last_name  TEXT\n);\nCREATE INDEX IF NOT EXISTS idx_vets_last_name ON vets (last_name);",
+          "path": "src/main/resources/db/postgres/schema.sql",
+          "start_line": 1
+        }
+      ],
+      "rationale": "Startup SQL initialization is configured with schema and data locations, and the deployed PostgreSQL profile sets that initializer to run always. The referenced PostgreSQL schema contains DDL, including CREATE TABLE and CREATE INDEX statements, so DDL runs on the application startup path.",
+      "rule_id": "PC-13",
+      "size": "L",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-13"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "artefact_new",
+            "crosses_model_boundary": "deploy_model",
+            "files_changed": "3",
+            "mechanical_path": false,
+            "new_artefact_required": "Kubernetes migration Job manifest or pipeline job definition",
+            "tests_required": "extend"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 3
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Add a two-phase PostgreSQL integration test and rendered-manifest check that fail if application startup still performs DDL or rollout is not gated by the migration job.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "For the deployed PostgreSQL configuration, application startup performs no schema or data initialization; a separate one-shot migration job creates the expected schema and seed data, and application rollout begins only after that job succeeds.",
+        "terminal_undetermined": true
+      }
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "identity",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [],
+      "rationale": "Not applicable: the inspected source tree contains no AWS API client construction or AWS credential-provider usage, so this application does not call AWS APIs.",
+      "rule_id": "PC-20",
+      "size": null,
+      "size_trace": null,
+      "verdict": "not_applicable",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "identity",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 14,
+          "excerpt": "kind: Secret\nmetadata:\n  name: demo-db\ntype: servicebinding.io/postgresql\nstringData:\n  type: \"postgresql\"\n  provider: \"postgresql\"\n  host: \"demo-db\"\n  port: \"5432\"\n  database: \"petclinic\"\n  username: \"user\"\n  password: \"pass\"",
+          "path": "k8s/db.yml",
+          "start_line": 3
+        },
+        {
+          "end_line": 5,
+          "excerpt": "# database init, supports mysql too\ndatabase=mysql\nspring.datasource.url=${MYSQL_URL:jdbc:mysql://localhost/petclinic}\nspring.datasource.username=${MYSQL_USER:petclinic}\nspring.datasource.password=${MYSQL_PASS:petclinic}",
+          "path": "src/main/resources/application-mysql.properties",
+          "start_line": 1
+        },
+        {
+          "end_line": 5,
+          "excerpt": "# database init, supports postgres too\ndatabase=postgres\nspring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}\nspring.datasource.username=${POSTGRES_USER:petclinic}\nspring.datasource.password=${POSTGRES_PASS:petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "start_line": 1
+        }
+      ],
+      "rationale": "Fail: committed Kubernetes Secret data contains a database password, and both datasource profiles provide committed password defaults. These are embedded secrets rather than values delivered from Secrets Manager through the Secrets Store CSI driver.",
+      "rule_id": "PC-21",
+      "size": "L",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-21"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "config_only",
+            "crosses_model_boundary": "deploy_model",
+            "files_changed": "4-8",
+            "mechanical_path": false,
+            "new_artefact_required": "SecretProviderClass",
+            "tests_required": "extend"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 3
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Statically reject embedded credentials and validate the rendered SecretProviderClass, then start the application with injected test credentials to prove the externalized boundary is consumed.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "No database password or usable credential default is committed; the rendered deployment contains a SecretProviderClass backed by AWS Secrets Manager, mounts or projects its values into the workload, and the application connects successfully when only those externally supplied test credentials are provided.",
+        "terminal_undetermined": true
+      }
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "observability",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 26,
+          "excerpt": "# Logging\nlogging.level.org.springframework=INFO\n# logging.level.org.springframework.web=DEBUG\n# logging.level.org.springframework.context.annotation=TRACE",
+          "path": "src/main/resources/application.properties",
+          "start_line": 23
+        }
+      ],
+      "rationale": "The repository configures only logging levels; it contains no appender or encoder declaration from which structured JSON stdout output can be established. The framework default's format is not established by repository evidence.",
+      "rule_id": "PC-30",
+      "size": null,
+      "size_trace": null,
+      "verdict": "undetermined",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "observability",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [],
+      "rationale": "The previous/model finding could not be retained because its current-source evidence did not pass deterministic citation validation.",
+      "rule_id": "PC-31",
+      "size": null,
+      "size_trace": null,
+      "verdict": "undetermined",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "observability",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 54,
+          "excerpt": "            - name: SPRING_APPLICATION_JSON\n              value: |\n                {\n                  \"management.endpoint.health.probes.add-additional-paths\": true\n                }\n          ports:\n            - name: http\n              containerPort: 8080\n          livenessProbe:\n            httpGet:\n              path: /livez\n              port: http\n          readinessProbe:\n            httpGet:\n              path: /readyz\n              port: http",
+          "path": "k8s/petclinic.yml",
+          "start_line": 39
+        },
+        {
+          "end_line": 5,
+          "excerpt": "# database init, supports postgres too\ndatabase=postgres\nspring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}\nspring.datasource.username=${POSTGRES_USER:petclinic}\nspring.datasource.password=${POSTGRES_PASS:petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "start_line": 1
+        }
+      ],
+      "rationale": "Both HTTP probe paths are declared and the deployed profile uses PostgreSQL, but the repository does not establish which downstream health contributors readiness checks or that liveness excludes them. Therefore the required dependency asymmetry cannot be determined.",
+      "rule_id": "PC-32",
+      "size": null,
+      "size_trace": null,
+      "verdict": "undetermined",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "delivery",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: petclinic\n  labels:\n    app: petclinic\nspec:\n  replicas: 1\n  selector:\n    matchLabels:\n      app: petclinic\n  template:\n    metadata:\n      labels:\n        app: petclinic\n    spec:\n      containers:\n        - name: workload\n          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "start_line": 15
+        },
+        {
+          "end_line": 25,
+          "excerpt": "      - name: Create k8s Kind Cluster\n        uses: helm/kind-action@v1\n\n      - name: Deploy application\n        run: |\n          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "start_line": 20
+        }
+      ],
+      "rationale": "PC-40 applies because this is a deployable application. Its deployment is a raw Kubernetes Deployment applied directly from k8s/, rather than a chart referencing nordhelm-base or values declared against it.",
+      "rule_id": "PC-40",
+      "size": "M",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-40"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "config_only",
+            "crosses_model_boundary": "none",
+            "files_changed": "4-8",
+            "mechanical_path": false,
+            "new_artefact_required": "nordhelm-base values file",
+            "tests_required": "write-new"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 4
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Render and validate the nordhelm-base release, assert the required application overrides are present, and deploy that release to the existing disposable Kind harness.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "The application is deployed by a nordhelm-base chart release using application-owned values for image, resources, probes, secret and identity references, and ingress exposure; the delivery workflow no longer applies the raw k8s directory directly.",
+        "terminal_undetermined": true
+      }
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "delivery",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 25,
+          "excerpt": "      - name: Create k8s Kind Cluster\n        uses: helm/kind-action@v1\n\n      - name: Deploy application\n        run: |\n          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "start_line": 20
+        },
+        {
+          "end_line": 33,
+          "excerpt": "      containers:\n        - name: workload\n          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "start_line": 31
+        }
+      ],
+      "rationale": "PC-41 applies because this is a deployable application. A GitHub Actions workflow deploys raw manifests, but the inspected configuration does not establish whether a commit-built image is scanned and promoted through environments by immutable digest. It also does not show a per-instance lifecycle-hook deployment model. The promotion model is therefore undetermined.",
+      "rule_id": "PC-41",
+      "size": null,
+      "size_trace": null,
+      "verdict": "undetermined",
+      "verification": null
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "networking",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 10,
+          "excerpt": "  type: NodePort\n  ports:\n    - port: 80\n      targetPort: 8080",
+          "path": "k8s/petclinic.yml",
+          "start_line": 7
+        }
+      ],
+      "rationale": "The deployable Service uses a NodePort and targets the hardcoded container port 8080, rather than supplying the application's single listener port through an environment variable.",
+      "rule_id": "PC-50",
+      "size": "XS",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-50"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "config_only",
+            "crosses_model_boundary": "none",
+            "files_changed": "1-2",
+            "mechanical_path": false,
+            "new_artefact_required": null,
+            "tests_required": "extend"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 5
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Exercise the application on a non-default platform-supplied PORT and validate that the rendered Service, probes, and ingress all target that listener.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "When PORT is set to a non-default value, the application listens only on that value, its readiness endpoint succeeds there, and the rendered internal Service and platform ingress route to the same named listener without NodePort exposure.",
+        "terminal_undetermined": true
+      }
+    },
+    {
+      "blocked_on_decision": false,
+      "category": "networking",
+      "decision_ref": null,
+      "decision_refs": [],
+      "evidence": [
+        {
+          "end_line": 10,
+          "excerpt": "kind: Service\nmetadata:\n  name: petclinic\nspec:\n  type: NodePort\n  ports:\n    - port: 80\n      targetPort: 8080",
+          "path": "k8s/petclinic.yml",
+          "start_line": 3
+        }
+      ],
+      "rationale": "The application's Kubernetes Service is explicitly exposed as NodePort, which creates node-bound port exposure and violates the prohibition on host-level networking assumptions.",
+      "rule_id": "PC-51",
+      "size": "XS",
+      "size_trace": {
+        "contributing_finding_ids": [
+          "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-51"
+        ],
+        "inputs": {
+          "blocked_on_decision": false,
+          "effort_facts": {
+            "change_kind": "config_only",
+            "crosses_model_boundary": "none",
+            "files_changed": "1-2",
+            "mechanical_path": true,
+            "new_artefact_required": null,
+            "tests_required": "extend"
+          },
+          "verification": {
+            "grade": "undetermined"
+          }
+        },
+        "matched_row": 5
+      },
+      "verdict": "fail",
+      "verification": {
+        "evidence": [],
+        "grade": "undetermined",
+        "method_summary": "Validate the rendered network objects against explicit policies and exercise internal Service DNS in the disposable Kind cluster.",
+        "rationale": "The proposed verification grade could not be retained because its current-source evidence did not pass deterministic citation validation.",
+        "success_condition": "The rendered workload contains no NodePort Service, hostPort, or hostNetwork setting; it exposes an internal ClusterIP Service reachable through Kubernetes Service DNS, and any external access is represented only by the platform ingress path.",
+        "terminal_undetermined": true
+      }
+    }
+  ],
+  "gap_density": 2.0,
+  "gap_score": 26,
+  "migration_category": "migration_needs_work",
+  "ranking": {
+    "app_id": "spring-petclinic",
+    "gap_density": 2.0,
+    "gap_score": 26,
+    "verif_index": 0.0
+  },
+  "repo": "https://github.com/FlorianSeidel/spring-petclinic",
+  "repo_size": "XL",
+  "repo_size_trace": {
+    "bumped": true,
+    "contributing_finding_ids": [
+      "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-03",
+      "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-13",
+      "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-21",
+      "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-40"
+    ],
+    "no_failing_findings": false
+  },
+  "run_id": "demo-before-sol-medium-20260920",
+  "schema_version": "1.0",
+  "terminal_undetermined_claims": [
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-03:f721431191ddb175",
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-13:f721431191ddb175",
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-21:f721431191ddb175",
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-40:f721431191ddb175",
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-50:f721431191ddb175",
+    "s3:spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-51:f721431191ddb175",
+    "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-02",
+    "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-30",
+    "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-31",
+    "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-32",
+    "spring-petclinic@818c4136ea971c21674525f9053de0d9c7ad8cfe@1.2@PC-41"
+  ],
+  "undetermined_rate": 0.38461538461538464,
+  "usage_cost": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 738176,
+    "completed_turns": 8,
+    "currency": "USD",
+    "estimated_api_cost_usd": 1.8557,
+    "input_tokens": 1064878,
+    "model_breakdown": [
+      {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 129792,
+        "completed_turns": 1,
+        "estimated_api_cost_usd": 0.016534,
+        "input_tokens": 175481,
+        "model": "gpt-5.6-luna",
+        "output_tokens": 4000,
+        "reasoning_output_tokens": 268
+      },
+      {
+        "cache_write_input_tokens": 0,
+        "cached_input_tokens": 608384,
+        "completed_turns": 7,
+        "estimated_api_cost_usd": 1.839166,
+        "input_tokens": 889397,
+        "model": "gpt-5.6-sol",
+        "output_tokens": 23588,
+        "reasoning_output_tokens": 3903
+      }
+    ],
+    "output_tokens": 27588,
+    "pricing_source": "https://developers.openai.com/api/docs/models/compare",
+    "pricing_version": "openai-api-standard-2026-09-19",
+    "reasoning_output_tokens": 4171,
+    "service_tier": "standard"
+  },
+  "verif_index": 0.0
+}

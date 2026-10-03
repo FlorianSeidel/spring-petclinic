@@ -1,0 +1,1645 @@
+{
+  "app_id": "spring-petclinic",
+  "application_commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+  "application_effort": 18,
+  "assurance": {
+    "citation_normalizations": [],
+    "issues": [],
+    "status": "assured",
+    "warnings": []
+  },
+  "blockers": [],
+  "file_actions": [
+    {
+      "action_id": "MA-03c43bd27565",
+      "business_logic": false,
+      "change": "Add a Dockerfile that copies the Maven-packaged jar from target/, uses a pinned Java 17 runtime image, creates the non-root runtime user, and starts the jar with /tmp as its writable temporary directory. This new file supplies the build input used by the existing Jenkins docker build step.",
+      "evidence": [
+        {
+          "end_line": 45,
+          "excerpt": "There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 45
+        },
+        {
+          "end_line": 71,
+          "excerpt": "docker build -t \"$REGISTRY/petclinic:$TARGET_SHA\" source",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 71
+        }
+      ],
+      "finding_key": "oci-build",
+      "key": "build-image-dockerfile",
+      "observation_keys": [
+        "missing-oci-build"
+      ],
+      "path": "Dockerfile",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "new",
+      "test_evidence": [],
+      "test_rationale": "The inspected tests exercise application behavior, not the missing container build or its runtime user."
+    },
+    {
+      "action_id": "MA-c6ec7f20dc8e",
+      "business_logic": false,
+      "change": "Replace the statements that there is no Dockerfile and that the runtime image is a latest tag with instructions for the new Dockerfile and Jenkins digest promotion.",
+      "evidence": [
+        {
+          "end_line": 45,
+          "excerpt": "There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 45
+        },
+        {
+          "end_line": 55,
+          "excerpt": "docker run -p 8080:8080 docker.io/library/spring-petclinic:latest",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 55
+        }
+      ],
+      "finding_key": "oci-build",
+      "key": "document-image-readme",
+      "observation_keys": [
+        "missing-oci-build"
+      ],
+      "path": "README.md",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [],
+      "test_rationale": "No existing test exercises the image build and promotion behavior being documented."
+    },
+    {
+      "action_id": "MA-baf04e9da22b",
+      "business_logic": false,
+      "change": "Remove the legacy workload manifest so the incompatible third-party image, NodePort route, incomplete readiness configuration, missing security context, and missing requests cannot be selected as the application deployment path. The existing platform Petclinic Deployment, Service, and Ingress supply the target path.",
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 33
+        },
+        {
+          "end_line": 7,
+          "excerpt": "  type: NodePort",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 16,
+          "excerpt": "The checked-in Petclinic GitOps manifests represent the later migrated commit; they\nare a reference example, not evidence that an assessed earlier commit has migrated.",
+          "path": "README.md",
+          "root": "platform",
+          "start_line": 15
+        }
+      ],
+      "finding_key": "retire-legacy-workload",
+      "key": "retire-legacy-workload-yml",
+      "observation_keys": [
+        "unrelated-workload-image",
+        "unsafe-workload-context",
+        "nodeport-route",
+        "readiness-without-db",
+        "workload-db-binding",
+        "missing-requests"
+      ],
+      "path": "k8s/petclinic.yml",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [],
+      "test_rationale": "The inspected application tests do not exercise the legacy Kubernetes manifest or the selected platform deployment settings."
+    },
+    {
+      "action_id": "MA-f0d13fc3e9c8",
+      "business_logic": false,
+      "change": "Remove the app-owned PostgreSQL Deployment, Service, and plaintext Secret manifest. The existing CloudNativePG Cluster and operator-generated application Secret provide the selected platform database path.",
+      "evidence": [
+        {
+          "end_line": 14,
+          "excerpt": "  password: [REDACTED demo credential]\"",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 14
+        },
+        {
+          "end_line": 31,
+          "excerpt": "  name: demo-db",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 31
+        },
+        {
+          "end_line": 12,
+          "excerpt": "      owner: petclinic",
+          "path": "k8s/postgres-cluster.yaml",
+          "root": "platform",
+          "start_line": 12
+        }
+      ],
+      "finding_key": "retire-app-db",
+      "key": "retire-legacy-db-yml",
+      "observation_keys": [
+        "app-owned-db",
+        "plaintext-db-secret"
+      ],
+      "path": "k8s/db.yml",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [],
+      "test_rationale": "No inspected test exercises the Kubernetes database workload or Secret provenance."
+    },
+    {
+      "action_id": "MA-b7a660901fa4",
+      "business_logic": false,
+      "change": "Remove the PostgreSQL profile's localhost URL and literal username/password fallbacks, requiring supplied connection values when that profile is used; change its SQL initialization mode from always to never.",
+      "evidence": [
+        {
+          "end_line": 3,
+          "excerpt": "spring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 3
+        },
+        {
+          "end_line": 5,
+          "excerpt": "spring.datasource.password=[REDACTED demo credential]",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 5
+        },
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 7
+        }
+      ],
+      "finding_key": "postgres-startup",
+      "key": "harden-postgres-profile",
+      "observation_keys": [
+        "postgres-local-fallbacks",
+        "postgres-startup-sql"
+      ],
+      "path": "src/main/resources/application-postgres.properties",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [
+        {
+          "end_line": 53,
+          "excerpt": "@ActiveProfiles(\"postgres\")",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 53
+        }
+      ],
+      "test_rationale": "The existing PostgreSQL integration test uses this profile, but does not verify disabled startup SQL or the absence of credential fallbacks."
+    },
+    {
+      "action_id": "MA-7475d796b27e",
+      "business_logic": false,
+      "change": "Adapt the PostgreSQL integration test to provision schema and seed data explicitly as test setup and assert that the profile does not initialize SQL during application startup.",
+      "evidence": [
+        {
+          "end_line": 53,
+          "excerpt": "@ActiveProfiles(\"postgres\")",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 53
+        },
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 7
+        }
+      ],
+      "finding_key": "postgres-startup",
+      "key": "adapt-postgres-integration-test",
+      "observation_keys": [
+        "postgres-startup-sql"
+      ],
+      "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [
+        {
+          "end_line": 90,
+          "excerpt": "\t\tResponseEntity<String> result = template.exchange(RequestEntity.get(\"/owners/1\").build(), String.class);",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 90
+        }
+      ],
+      "test_rationale": "The current test reads seeded data, but does not distinguish test provisioning from application startup initialization. This edit creates that check."
+    },
+    {
+      "action_id": "MA-f8d41c95e9a5",
+      "business_logic": false,
+      "change": "Update the PostgreSQL setup section to document externally supplied connection values and pre-rollout SQL provisioning for the migrated profile.",
+      "evidence": [
+        {
+          "end_line": 68,
+          "excerpt": "A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Note that whenever the database type changes, the app needs to run with a different profile: `spring.profiles.active=mysql` for MySQL or `spring.profiles.active=postgres` for PostgreSQL. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on how to set the active profile.",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 68
+        }
+      ],
+      "finding_key": "postgres-startup",
+      "key": "document-postgres-profile",
+      "observation_keys": [
+        "postgres-local-fallbacks",
+        "postgres-startup-sql"
+      ],
+      "path": "README.md",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [
+        {
+          "end_line": 53,
+          "excerpt": "@ActiveProfiles(\"postgres\")",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 53
+        }
+      ],
+      "test_rationale": "The existing profile test does not establish the new no-startup-initialization behavior being documented."
+    },
+    {
+      "action_id": "MA-8fc7fd764e0f",
+      "business_logic": false,
+      "change": "Retire the Kind workflow that applies k8s/ directly, since those legacy manifests are removed and the migration uses Jenkins digest promotion and Argo CD.",
+      "evidence": [
+        {
+          "end_line": 25,
+          "excerpt": "          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "root": "application",
+          "start_line": 25
+        },
+        {
+          "end_line": 86,
+          "excerpt": "sed -i \"s|image: .*petclinic@sha256:.*|image: $IMAGE|\" gitops/petclinic/deployment.yaml",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 86
+        }
+      ],
+      "finding_key": "retire-kind-delivery",
+      "key": "retire-kind-workflow",
+      "observation_keys": [
+        "legacy-kind-delivery"
+      ],
+      "path": ".github/workflows/deploy-and-test-cluster.yml",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [],
+      "test_rationale": "The inspected tests do not exercise the workflow's delivery path."
+    },
+    {
+      "action_id": "MA-2eb194a6b4e6",
+      "business_logic": false,
+      "change": "Replace wildcard Actuator web exposure with the health and info endpoints needed for the migrated runtime.",
+      "evidence": [
+        {
+          "end_line": 21,
+          "excerpt": "management.endpoints.web.exposure.include=*",
+          "path": "src/main/resources/application.properties",
+          "root": "application",
+          "start_line": 21
+        },
+        {
+          "end_line": 56,
+          "excerpt": "              value: health,info",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 56
+        }
+      ],
+      "finding_key": "actuator-exposure",
+      "key": "restrict-actuator-default",
+      "observation_keys": [
+        "broad-actuator"
+      ],
+      "path": "src/main/resources/application.properties",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "existing",
+      "test_evidence": [],
+      "test_rationale": "No inspected test checks which Actuator endpoints the default configuration exposes."
+    },
+    {
+      "action_id": "MA-37ce55733d75",
+      "business_logic": false,
+      "change": "Add an integration test using the platform-equivalent health settings and PostgreSQL dependency that checks /livez and /readyz separately and verifies readiness becomes unavailable when the database connection fails.",
+      "evidence": [
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        },
+        {
+          "end_line": 95,
+          "excerpt": "to test readiness failure. A single local PostgreSQL instance cannot prove",
+          "path": "README.md",
+          "root": "platform",
+          "start_line": 95
+        }
+      ],
+      "finding_key": "readiness-test",
+      "key": "test-db-readiness",
+      "observation_keys": [
+        "no-db-outage-test"
+      ],
+      "path": "src/test/java/org/springframework/samples/petclinic/PlatformHealthIntegrationTests.java",
+      "relevant_tests_in_place": false,
+      "root": "application",
+      "state": "new",
+      "test_evidence": [
+        {
+          "end_line": 90,
+          "excerpt": "\t\tResponseEntity<String> result = template.exchange(RequestEntity.get(\"/owners/1\").build(), String.class);",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 90
+        }
+      ],
+      "test_rationale": "The existing PostgreSQL test checks an application page while PostgreSQL is available; it does not exercise either probe or database-loss behavior."
+    },
+    {
+      "action_id": "MA-fdf38220f09c",
+      "business_logic": false,
+      "change": "Configure the Maven Jenkins container to reach the existing Docker sidecar for integration tests and remove -DskipTests from the package command, so tests gate image build and promotion.",
+      "evidence": [
+        {
+          "end_line": 61,
+          "excerpt": "          sh 'cd source && sh ./mvnw -B -DskipTests -Dcheckstyle.skip package'",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 61
+        },
+        {
+          "end_line": 23,
+          "excerpt": "          value: tcp://127.0.0.1:2375",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 23
+        }
+      ],
+      "finding_key": "jenkins-test-gate",
+      "key": "run-tests-jenkinsfile",
+      "observation_keys": [
+        "jenkins-skips-tests"
+      ],
+      "path": "jenkins/Jenkinsfile",
+      "relevant_tests_in_place": false,
+      "root": "platform",
+      "state": "existing",
+      "test_evidence": [
+        {
+          "end_line": 53,
+          "excerpt": "@ActiveProfiles(\"postgres\")",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 53
+        }
+      ],
+      "test_rationale": "Application integration tests exist, but the current Jenkins command skips them; no existing test exercises this CI gate."
+    }
+  ],
+  "file_effort_trace": [
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-6246f3bf8944"
+      ],
+      "path": ".github/workflows/deploy-and-test-cluster.yml",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-ffc2397626a1"
+      ],
+      "path": "Dockerfile",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-edd4d6f0ca35",
+        "MF-ffc2397626a1"
+      ],
+      "path": "README.md",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-10db5a1e7948"
+      ],
+      "path": "k8s/db.yml",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-7e8414a37253"
+      ],
+      "path": "k8s/petclinic.yml",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-edd4d6f0ca35"
+      ],
+      "path": "src/main/resources/application-postgres.properties",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-98ce6f62476b"
+      ],
+      "path": "src/main/resources/application.properties",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-29b0d4221feb"
+      ],
+      "path": "src/test/java/org/springframework/samples/petclinic/PlatformHealthIntegrationTests.java",
+      "root": "application",
+      "test_multiplier": 2
+    },
+    {
+      "effort": 2,
+      "file_weight": 1,
+      "finding_ids": [
+        "MF-edd4d6f0ca35"
+      ],
+      "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+      "root": "application",
+      "test_multiplier": 2
+    }
+  ],
+  "findings": [
+    {
+      "action_keys": [
+        "build-image-dockerfile",
+        "document-image-readme"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 45,
+          "excerpt": "There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 45
+        },
+        {
+          "end_line": 71,
+          "excerpt": "docker build -t \"$REGISTRY/petclinic:$TARGET_SHA\" source",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 71
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-ffc2397626a1",
+      "key": "oci-build",
+      "problem": "The pinned application has no Dockerfile compatible with the existing Jenkins docker build step. Its container instructions also describe a mutable latest tag.",
+      "proposed_change": "Add the non-root Java 17 OCI build definition and update its build documentation.",
+      "rule_ids": [
+        "DP-01",
+        "DP-02"
+      ],
+      "success_condition": "Jenkins can build the packaged application jar from a pinned commit, push it, obtain a sha256 digest, and run the resulting image as the non-root user required by the existing platform Deployment.",
+      "title": "Supply the application OCI build",
+      "web_references": [],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 33
+        },
+        {
+          "end_line": 7,
+          "excerpt": "  type: NodePort",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-7e8414a37253",
+      "key": "retire-legacy-workload",
+      "problem": "The pinned application retains a separate deployment path with an unrelated image, NodePort, no required runtime security context or resource requests, and readiness that does not add the database indicator. The later platform reference already contains the target settings but does not migrate this earlier application commit.",
+      "proposed_change": "Retire the incompatible application workload manifest and use the existing app-specific platform GitOps Deployment, Service, and Ingress as the migration path.",
+      "rule_ids": [
+        "DP-01",
+        "DP-02",
+        "DP-03",
+        "DP-04",
+        "DP-05",
+        "DP-08",
+        "DP-09"
+      ],
+      "success_condition": "No application delivery path selects the legacy workload; the selected GitOps workload uses the Jenkins digest, non-root read-only runtime, ClusterIP and Traefik route, distinct probes with database readiness, operator Secret, and CPU and memory requests.",
+      "title": "Retire the incompatible workload manifest",
+      "web_references": [
+        {
+          "accessed_at": "2026-09-23T16:19:27Z",
+          "supports": "For Spring Boot 4.1, the additional-paths setting exposes /livez and /readyz, but readiness does not include database health by default; the db indicator checks whether a DataSource connection can be obtained. This supports treating the legacy readiness configuration as a distinct violation and the platform readinessState,db setting as the target configuration.",
+          "title": "Endpoints :: Spring Boot",
+          "url": "https://docs.spring.io/spring-boot/4.1/reference/actuator/endpoints.html"
+        }
+      ],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "retire-legacy-db-yml"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 14,
+          "excerpt": "  password: [REDACTED demo credential]\"",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 14
+        },
+        {
+          "end_line": 31,
+          "excerpt": "  name: demo-db",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 31
+        },
+        {
+          "end_line": 40,
+          "excerpt": "                  name: petclinic-db-app",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 40
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-10db5a1e7948",
+      "key": "retire-app-db",
+      "problem": "The application repository contains an app-owned PostgreSQL Deployment and a plaintext Kubernetes Secret. The selected platform already provisions CloudNativePG and refers to its generated application Secret.",
+      "proposed_change": "Remove the legacy database manifest from the application delivery path.",
+      "rule_ids": [
+        "DP-05",
+        "DP-07"
+      ],
+      "success_condition": "GitOps contains no app-owned PostgreSQL workload or plaintext database Secret, and the application and migration Job use the CloudNativePG service and generated Secret.",
+      "title": "Retire the application-owned database and plaintext Secret",
+      "web_references": [],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "harden-postgres-profile",
+        "adapt-postgres-integration-test",
+        "document-postgres-profile"
+      ],
+      "dependencies": [
+        {
+          "blocks_migration": false,
+          "effect_if_resolved": "A documented image and database rollback procedure would make it easier to coordinate a failed application rollout with a compatible schema.",
+          "id": "PB-02",
+          "kind": "backlog",
+          "rationale": "The existing SQL and PreSync Job permit this local migration, while the platform rollback procedure remains planned.",
+          "why_this_app": "Petclinic changes from startup schema and seed initialization to a PreSync SQL Job."
+        }
+      ],
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 5,
+          "excerpt": "spring.datasource.password=[REDACTED demo credential]",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 5
+        },
+        {
+          "end_line": 6,
+          "excerpt": "    argocd.argoproj.io/hook: PreSync",
+          "path": "migrations/petclinic/migration-job.yaml",
+          "root": "platform",
+          "start_line": 6
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-edd4d6f0ca35",
+      "key": "postgres-startup",
+      "problem": "The PostgreSQL profile still enables startup SQL and supplies local connection and literal credential fallbacks. The platform's PreSync Job and Deployment overrides are already present, but the profile is an independent source violation.",
+      "proposed_change": "Require supplied PostgreSQL connection values in that profile, disable its startup SQL, adapt the profile integration test to provision data as test setup, and document the new behavior.",
+      "rule_ids": [
+        "DP-05",
+        "DP-06",
+        "DP-07"
+      ],
+      "success_condition": "The PostgreSQL profile cannot silently use localhost or the committed password; application startup performs no schema or seed SQL; the PostgreSQL integration test provisions its own data and verifies that behavior.",
+      "title": "Remove PostgreSQL startup initialization and credential fallbacks",
+      "web_references": [],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "retire-kind-workflow"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 25,
+          "excerpt": "          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "root": "application",
+          "start_line": 25
+        },
+        {
+          "end_line": 92,
+          "excerpt": "  git -C gitops push origin main",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 92
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-6246f3bf8944",
+      "key": "retire-kind-delivery",
+      "problem": "An application workflow still applies the legacy k8s directory directly to Kind, bypassing the selected Jenkins-to-internal-Git-to-Argo-CD delivery path.",
+      "proposed_change": "Retire that legacy deployment workflow after removing its manifests.",
+      "rule_ids": [
+        "DP-08"
+      ],
+      "success_condition": "No application CI workflow deploys the retired k8s directory; migration delivery is through the existing digest-promoting Jenkins pipeline and Argo CD Application.",
+      "title": "Retire direct Kind delivery",
+      "web_references": [],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "restrict-actuator-default"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 21,
+          "excerpt": "management.endpoints.web.exposure.include=*",
+          "path": "src/main/resources/application.properties",
+          "root": "application",
+          "start_line": 21
+        },
+        {
+          "end_line": 56,
+          "excerpt": "              value: health,info",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 56
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-98ce6f62476b",
+      "key": "actuator-exposure",
+      "problem": "The application's default configuration exposes every Actuator web endpoint. The selected platform manifest narrows exposure, but the broad source default remains an independent runtime risk.",
+      "proposed_change": "Set the source default to health and info.",
+      "rule_ids": [],
+      "success_condition": "The application's default web Actuator exposure is limited to health and info, matching the selected platform runtime.",
+      "title": "Narrow default Actuator exposure",
+      "web_references": [
+        {
+          "accessed_at": "2026-09-23T16:19:27Z",
+          "supports": "Spring Boot 4.1 documents that * exposes all endpoints and that exposed Actuator endpoints may contain sensitive information.",
+          "title": "Endpoints :: Spring Boot",
+          "url": "https://docs.spring.io/spring-boot/4.1/reference/actuator/endpoints.html"
+        }
+      ],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "test-db-readiness"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        },
+        {
+          "end_line": 95,
+          "excerpt": "to test readiness failure. A single local PostgreSQL instance cannot prove",
+          "path": "README.md",
+          "root": "platform",
+          "start_line": 95
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-29b0d4221feb",
+      "key": "readiness-test",
+      "problem": "Existing tests and the platform's healthy-probe check do not verify that database loss makes readiness fail while liveness remains independent.",
+      "proposed_change": "Add a targeted integration test for the selected health configuration and PostgreSQL outage behavior.",
+      "rule_ids": [],
+      "success_condition": "The targeted test observes distinct healthy probes, then observes readiness fail on database loss without making liveness depend on the database.",
+      "title": "Test database-dependent readiness failure",
+      "web_references": [
+        {
+          "accessed_at": "2026-09-23T16:19:27Z",
+          "supports": "Spring Boot 4.1 states that database health is excluded from readiness by default, that db checks DataSource connectivity, and that liveness should not depend on external systems.",
+          "title": "Endpoints :: Spring Boot",
+          "url": "https://docs.spring.io/spring-boot/4.1/reference/actuator/endpoints.html"
+        }
+      ],
+      "work_owner": "application"
+    },
+    {
+      "action_keys": [
+        "run-tests-jenkinsfile"
+      ],
+      "dependencies": [],
+      "evidence": [
+        {
+          "end_line": 61,
+          "excerpt": "          sh 'cd source && sh ./mvnw -B -DskipTests -Dcheckstyle.skip package'",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 61
+        },
+        {
+          "end_line": 53,
+          "excerpt": "@ActiveProfiles(\"postgres\")",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 53
+        }
+      ],
+      "file_list_complete": true,
+      "finding_id": "MF-baab26851f0b",
+      "key": "jenkins-test-gate",
+      "problem": "The shared Jenkins packaging step skips application tests before building and promoting the image, including the PostgreSQL boundary test.",
+      "proposed_change": "Make the Maven container able to use the existing Docker sidecar and run tests before image build and promotion.",
+      "rule_ids": [],
+      "success_condition": "A failing application integration test prevents Jenkins from building and promoting a digest; successful tests allow promotion.",
+      "title": "Run application tests before Jenkins promotion",
+      "web_references": [],
+      "work_owner": "platform_shared"
+    }
+  ],
+  "input_fingerprints": {
+    "application_tree": "0bb31bb92bc1839f6378e832e54c8b4af03e4ee2",
+    "contract_sha256": "0e5e0aba1a508f9261ceeff6f016cc7d581f1a17d31461f3e24a09ddd2bc14d1",
+    "model": "gpt-6-sol",
+    "platform_tree": "d68124ca315d1c15b874bf03c1f0d88c09cd5493",
+    "prompt_sha256": "4c0d4652563905d68f5f469ca3c11868bc3de46f70dd4e1aa2380f9ecdba696b",
+    "reasoning_effort": "high",
+    "register_sha256": "3a0e66556bfabb3595cf667b01b959497047dfba10b5364ebda893ecee200269",
+    "schema_sha256": "e6b8f0bb06f9aaca8a1e3d7f73f2f66baeb528505ad7265fb798ea3137d52bb0",
+    "web_search": "live"
+  },
+  "migration_category": "migration_needs_work",
+  "observations": [
+    {
+      "action_keys": [
+        "build-image-dockerfile",
+        "document-image-readme"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 45,
+          "excerpt": "There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 45
+        },
+        {
+          "end_line": 71,
+          "excerpt": "docker build -t \"$REGISTRY/petclinic:$TARGET_SHA\" source",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 71
+        }
+      ],
+      "key": "missing-oci-build",
+      "problem": "The pinned source has no Dockerfile for the platform pipeline's docker build.",
+      "rationale": "The source-oriented DP-01 pass condition requires a compatible OCI build definition.",
+      "rule_ids": [
+        "DP-01"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 33
+        }
+      ],
+      "key": "unrelated-workload-image",
+      "problem": "The application workload manifest selects an unrelated image rather than the Jenkins-built digest.",
+      "rationale": "This is a separate DP-01 violation from the missing build definition.",
+      "rule_ids": [
+        "DP-01"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "    spec:\n      containers:\n        - name: workload\n          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 30
+        },
+        {
+          "end_line": 91,
+          "excerpt": "            readOnlyRootFilesystem: true",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 91
+        }
+      ],
+      "key": "unsafe-workload-context",
+      "problem": "The legacy workload defines no non-root, no-escalation, or read-only-root security context.",
+      "rationale": "The later platform reference has those settings, but the pinned application's own manifest remains incompatible.",
+      "rule_ids": [
+        "DP-02"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "  type: NodePort",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 8,
+          "excerpt": "  type: ClusterIP",
+          "path": "migrations/petclinic/service.yaml",
+          "root": "platform",
+          "start_line": 8
+        }
+      ],
+      "key": "nodeport-route",
+      "problem": "The application manifest exposes a NodePort instead of the selected ClusterIP and Traefik route.",
+      "rationale": "DP-03 explicitly rejects a NodePort route.",
+      "rule_ids": [
+        "DP-03"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 43,
+          "excerpt": "                }",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 43
+        },
+        {
+          "end_line": 42,
+          "excerpt": "                  \"management.endpoint.health.probes.add-additional-paths\": true",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 42
+        },
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        }
+      ],
+      "key": "readiness-without-db",
+      "problem": "The legacy workload enables /livez and /readyz but does not add db to the readiness health group.",
+      "rationale": "Spring Boot 4.1 does not include database health in readiness by default. The platform reference explicitly includes it.",
+      "rule_ids": [
+        "DP-04"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 64,
+          "excerpt": "                  name: demo-db",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 64
+        },
+        {
+          "end_line": 36,
+          "excerpt": "              value: jdbc:postgresql://petclinic-db-rw.demo-app.svc.cluster.local:5432/petclinic",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 36
+        }
+      ],
+      "key": "workload-db-binding",
+      "problem": "The legacy workload binds to demo-db rather than the CloudNativePG service and operator-generated credential Secret.",
+      "rationale": "This is distinct from the app-owned database workload and its plaintext Secret.",
+      "rule_ids": [
+        "DP-05"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-workload-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 59,
+          "excerpt": "      volumes:",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 59
+        },
+        {
+          "end_line": 84,
+          "excerpt": "              memory: 512Mi",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 84
+        }
+      ],
+      "key": "missing-requests",
+      "problem": "The legacy application container declares no CPU or memory requests.",
+      "rationale": "The inspected legacy container specification has no resources block; the later GitOps Deployment supplies both requests.",
+      "rule_ids": [
+        "DP-09"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-db-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 31,
+          "excerpt": "  name: demo-db",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 31
+        },
+        {
+          "end_line": 44,
+          "excerpt": "        - image: postgres:18.4",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 44
+        }
+      ],
+      "key": "app-owned-db",
+      "problem": "The application repository deploys its own PostgreSQL workload.",
+      "rationale": "DP-05 requires the platform-provisioned CloudNativePG service instead.",
+      "rule_ids": [
+        "DP-05"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-legacy-db-yml"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 14,
+          "excerpt": "  password: [REDACTED demo credential]\"",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 14
+        }
+      ],
+      "key": "plaintext-db-secret",
+      "problem": "The legacy Kubernetes Secret commits a literal database password.",
+      "rationale": "DP-07 forbids plaintext credentials in selected migration configuration.",
+      "rule_ids": [
+        "DP-07"
+      ]
+    },
+    {
+      "action_keys": [
+        "harden-postgres-profile",
+        "document-postgres-profile"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 3,
+          "excerpt": "spring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 3
+        },
+        {
+          "end_line": 5,
+          "excerpt": "spring.datasource.password=[REDACTED demo credential]",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 5
+        }
+      ],
+      "key": "postgres-local-fallbacks",
+      "problem": "The PostgreSQL profile can fall back to localhost and a committed literal credential.",
+      "rationale": "Although the selected platform Deployment overrides connection settings, this separately selectable source profile should require supplied values.",
+      "rule_ids": [
+        "DP-05",
+        "DP-07"
+      ]
+    },
+    {
+      "action_keys": [
+        "harden-postgres-profile",
+        "adapt-postgres-integration-test",
+        "document-postgres-profile"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 7
+        }
+      ],
+      "key": "postgres-startup-sql",
+      "problem": "The PostgreSQL profile initializes schema and data during application startup.",
+      "rationale": "The platform Deployment overrides this setting, but the independent profile source violation must be removed to make pre-rollout SQL the sole migration path.",
+      "rule_ids": [
+        "DP-06"
+      ]
+    },
+    {
+      "action_keys": [
+        "retire-kind-workflow"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 25,
+          "excerpt": "          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "root": "application",
+          "start_line": 25
+        }
+      ],
+      "key": "legacy-kind-delivery",
+      "problem": "A workflow deploys the application directly to Kind from the legacy k8s directory.",
+      "rationale": "It bypasses the selected Jenkins digest promotion and Argo CD path and would refer to retired manifests.",
+      "rule_ids": [
+        "DP-08"
+      ]
+    },
+    {
+      "action_keys": [
+        "restrict-actuator-default"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 21,
+          "excerpt": "management.endpoints.web.exposure.include=*",
+          "path": "src/main/resources/application.properties",
+          "root": "application",
+          "start_line": 21
+        }
+      ],
+      "key": "broad-actuator",
+      "problem": "The default application configuration exposes all Actuator web endpoints.",
+      "rationale": "The platform Deployment narrows this at runtime; the broad source default is an independent migration hardening item beyond the nine rules.",
+      "rule_ids": []
+    },
+    {
+      "action_keys": [
+        "test-db-readiness"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 95,
+          "excerpt": "to test readiness failure. A single local PostgreSQL instance cannot prove",
+          "path": "README.md",
+          "root": "platform",
+          "start_line": 95
+        },
+        {
+          "end_line": 90,
+          "excerpt": "\t\tResponseEntity<String> result = template.exchange(RequestEntity.get(\"/owners/1\").build(), String.class);",
+          "path": "src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java",
+          "root": "application",
+          "start_line": 90
+        }
+      ],
+      "key": "no-db-outage-test",
+      "problem": "Existing coverage checks PostgreSQL-backed pages while healthy but not readiness under database loss.",
+      "rationale": "A targeted test can check the changed health boundary independently of the later live oracle.",
+      "rule_ids": []
+    },
+    {
+      "action_keys": [
+        "run-tests-jenkinsfile"
+      ],
+      "disposition": "change",
+      "evidence": [
+        {
+          "end_line": 61,
+          "excerpt": "          sh 'cd source && sh ./mvnw -B -DskipTests -Dcheckstyle.skip package'",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 61
+        }
+      ],
+      "key": "jenkins-skips-tests",
+      "problem": "The shared promotion pipeline skips tests before building the image.",
+      "rationale": "Running the existing and proposed boundary tests before promotion is shared platform work.",
+      "rule_ids": []
+    },
+    {
+      "action_keys": [],
+      "disposition": "no_change",
+      "evidence": [
+        {
+          "end_line": 4,
+          "excerpt": "spring.sql.init.data-locations=classpath*:db/${database}/data.sql",
+          "path": "src/main/resources/application.properties",
+          "root": "application",
+          "start_line": 4
+        },
+        {
+          "end_line": 50,
+          "excerpt": "              value: never",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 50
+        }
+      ],
+      "key": "h2-default-overridden",
+      "problem": "The default application configuration points at H2 schema and seed resources.",
+      "rationale": "The selected GitOps Deployment supplies the PostgreSQL DataSource and disables startup SQL; the H2 default remains useful for local development and tests.",
+      "rule_ids": [
+        "DP-05",
+        "DP-06"
+      ]
+    },
+    {
+      "action_keys": [],
+      "disposition": "no_change",
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-mysql.properties",
+          "root": "application",
+          "start_line": 7
+        }
+      ],
+      "key": "mysql-local-profile",
+      "problem": "The MySQL profile also enables startup SQL.",
+      "rationale": "The selected migration is PostgreSQL; the MySQL profile is not selected by the platform Deployment and is not migration work for this application-platform pair.",
+      "rule_ids": [
+        "DP-06"
+      ]
+    },
+    {
+      "action_keys": [],
+      "disposition": "no_change",
+      "evidence": [
+        {
+          "end_line": 19,
+          "excerpt": "      - [REDACTED sha256:9c3f8e6fa470]",
+          "path": "docker-compose.yml",
+          "root": "application",
+          "start_line": 19
+        }
+      ],
+      "key": "compose-local-only",
+      "problem": "The local Docker Compose development database has a literal password.",
+      "rationale": "The selected GitOps configuration does not deploy this Compose service or commit it as a Kubernetes Secret; the separate legacy k8s Secret is the DP-07 violation.",
+      "rule_ids": [
+        "DP-07"
+      ]
+    },
+    {
+      "action_keys": [],
+      "disposition": "no_change",
+      "evidence": [
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        },
+        {
+          "end_line": 8,
+          "excerpt": "  type: ClusterIP",
+          "path": "migrations/petclinic/service.yaml",
+          "root": "platform",
+          "start_line": 8
+        },
+        {
+          "end_line": 6,
+          "excerpt": "  ingressClassName: traefik",
+          "path": "migrations/petclinic/ingress.yaml",
+          "root": "platform",
+          "start_line": 6
+        }
+      ],
+      "key": "reference-gitops-ready",
+      "problem": "The later-commit platform reference already contains several required target settings.",
+      "rationale": "Those files require no edit for the identified source violations; their existence does not establish that the pinned earlier application commit has migrated.",
+      "rule_ids": [
+        "DP-02",
+        "DP-03",
+        "DP-04",
+        "DP-05",
+        "DP-07",
+        "DP-09"
+      ]
+    },
+    {
+      "action_keys": [],
+      "disposition": "no_change",
+      "evidence": [
+        {
+          "end_line": 1,
+          "excerpt": "CREATE TABLE IF NOT EXISTS vets (",
+          "path": "src/main/resources/db/postgres/schema.sql",
+          "root": "application",
+          "start_line": 1
+        },
+        {
+          "end_line": 1,
+          "excerpt": "CREATE TABLE IF NOT EXISTS vets (",
+          "path": "migrations/petclinic/sql/schema.sql",
+          "root": "platform",
+          "start_line": 1
+        },
+        {
+          "end_line": 29,
+          "excerpt": "              psql -v ON_ERROR_STOP=1 -f /sql/schema.sql",
+          "path": "migrations/petclinic/migration-job.yaml",
+          "root": "platform",
+          "start_line": 29
+        }
+      ],
+      "key": "sql-already-copied",
+      "problem": "The PostgreSQL schema and seed SQL are already present in the platform reference PreSync path.",
+      "rationale": "The inspected platform SQL matches the pinned application's PostgreSQL SQL, so no SQL file action is supported by the evidence.",
+      "rule_ids": [
+        "DP-06"
+      ]
+    }
+  ],
+  "platform_signals": [
+    {
+      "blocks_migration": false,
+      "effect_if_resolved": "A documented image and database rollback procedure would make it easier to coordinate a failed application rollout with a compatible schema.",
+      "finding_id": "MF-edd4d6f0ca35",
+      "id": "PB-02",
+      "kind": "backlog",
+      "rationale": "The existing SQL and PreSync Job permit this local migration, while the platform rollback procedure remains planned.",
+      "why_this_app": "Petclinic changes from startup schema and seed initialization to a PreSync SQL Job."
+    }
+  ],
+  "platform_tree": "d68124ca315d1c15b874bf03c1f0d88c09cd5493",
+  "rule_results": [
+    {
+      "evidence": [
+        {
+          "end_line": 45,
+          "excerpt": "There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:",
+          "path": "README.md",
+          "root": "application",
+          "start_line": 45
+        },
+        {
+          "end_line": 33,
+          "excerpt": "          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 33
+        }
+      ],
+      "finding_keys": [
+        "oci-build",
+        "retire-legacy-workload"
+      ],
+      "rationale": "Applicable: Petclinic is delivered as an OCI image. The pinned source lacks the build definition required by Jenkins and its own manifest selects an unrelated image, meeting two assessment fail conditions.",
+      "rule_id": "DP-01",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "    spec:\n      containers:\n        - name: workload\n          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 30
+        },
+        {
+          "end_line": 91,
+          "excerpt": "            readOnlyRootFilesystem: true",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 91
+        }
+      ],
+      "finding_keys": [
+        "oci-build",
+        "retire-legacy-workload"
+      ],
+      "rationale": "Applicable: Petclinic runs in an application pod. The pinned workload has no required security settings and the source has no container build establishing a non-root user. The later platform Deployment is a reference, not proof for this commit.",
+      "rule_id": "DP-02",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "  type: NodePort",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 6,
+          "excerpt": "  ingressClassName: traefik",
+          "path": "migrations/petclinic/ingress.yaml",
+          "root": "platform",
+          "start_line": 6
+        }
+      ],
+      "finding_keys": [
+        "retire-legacy-workload"
+      ],
+      "rationale": "Applicable: the application serves HTTP. Its pinned manifest uses NodePort, an explicit assessment failure, although the later platform reference supplies a Traefik route.",
+      "rule_id": "DP-03",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 53,
+          "excerpt": "              path: /readyz",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 53
+        },
+        {
+          "end_line": 42,
+          "excerpt": "                  \"management.endpoint.health.probes.add-additional-paths\": true",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 42
+        },
+        {
+          "end_line": 62,
+          "excerpt": "              value: readinessState,db",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 62
+        }
+      ],
+      "finding_keys": [
+        "retire-legacy-workload"
+      ],
+      "rationale": "Applicable: the application depends on PostgreSQL. The legacy manifest has distinct paths but does not include db in readiness; official Spring Boot 4.1 documentation confirms it is not included by default. The selected platform reference does include it.",
+      "rule_id": "DP-04",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 31,
+          "excerpt": "  name: demo-db",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 31
+        },
+        {
+          "end_line": 64,
+          "excerpt": "                  name: demo-db",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 64
+        },
+        {
+          "end_line": 3,
+          "excerpt": "spring.datasource.url=${POSTGRES_URL:jdbc:postgresql://localhost/petclinic}",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 3
+        }
+      ],
+      "finding_keys": [
+        "retire-legacy-workload",
+        "retire-app-db",
+        "postgres-startup"
+      ],
+      "rationale": "Applicable: Petclinic has a PostgreSQL driver and relational data. Its pinned source supplies an app-owned database, a legacy binding to that database, and a localhost profile fallback; these meet DP-05 assessment fail conditions despite the later CloudNativePG reference.",
+      "rule_id": "DP-05",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 7,
+          "excerpt": "spring.sql.init.mode=always",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 7
+        },
+        {
+          "end_line": 6,
+          "excerpt": "    argocd.argoproj.io/hook: PreSync",
+          "path": "migrations/petclinic/migration-job.yaml",
+          "root": "platform",
+          "start_line": 6
+        }
+      ],
+      "finding_keys": [
+        "postgres-startup"
+      ],
+      "rationale": "Applicable: the application has PostgreSQL schema and seed SQL. The pinned PostgreSQL profile performs startup SQL, an assessment failure. The existing platform PreSync Job and deployment override do not erase this independent source setting.",
+      "rule_id": "DP-06",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 14,
+          "excerpt": "  password: [REDACTED demo credential]\"",
+          "path": "k8s/db.yml",
+          "root": "application",
+          "start_line": 14
+        },
+        {
+          "end_line": 5,
+          "excerpt": "spring.datasource.password=[REDACTED demo credential]",
+          "path": "src/main/resources/application-postgres.properties",
+          "root": "application",
+          "start_line": 5
+        },
+        {
+          "end_line": 45,
+          "excerpt": "                  name: petclinic-db-app",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 45
+        }
+      ],
+      "finding_keys": [
+        "retire-app-db",
+        "postgres-startup"
+      ],
+      "rationale": "Applicable: the application needs database credentials. The pinned legacy Kubernetes Secret and active legacy PostgreSQL profile include literal credentials. The later GitOps reference correctly uses an operator-generated Secret but does not make the pinned source pass.",
+      "rule_id": "DP-07",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 25,
+          "excerpt": "          kubectl apply -f k8s/",
+          "path": ".github/workflows/deploy-and-test-cluster.yml",
+          "root": "application",
+          "start_line": 25
+        },
+        {
+          "end_line": 92,
+          "excerpt": "  git -C gitops push origin main",
+          "path": "jenkins/Jenkinsfile",
+          "root": "platform",
+          "start_line": 92
+        }
+      ],
+      "finding_keys": [
+        "retire-legacy-workload",
+        "retire-kind-delivery"
+      ],
+      "rationale": "Applicable: this application is delivered through GitOps on the selected platform. The pinned application retains direct Kind deployment of incompatible manifests, while the later platform pipeline supplies the intended digest promotion.",
+      "rule_id": "DP-08",
+      "verdict": "fail"
+    },
+    {
+      "evidence": [
+        {
+          "end_line": 33,
+          "excerpt": "          image: dsyer/petclinic",
+          "path": "k8s/petclinic.yml",
+          "root": "application",
+          "start_line": 33
+        },
+        {
+          "end_line": 84,
+          "excerpt": "              memory: 512Mi",
+          "path": "migrations/petclinic/deployment.yaml",
+          "root": "platform",
+          "start_line": 84
+        }
+      ],
+      "finding_keys": [
+        "retire-legacy-workload"
+      ],
+      "rationale": "Applicable: the pinned source defines an application container. Its legacy container specification has no resources.requests; the later platform reference declares both requests but does not make the earlier manifest compliant.",
+      "rule_id": "DP-09",
+      "verdict": "fail"
+    }
+  ],
+  "schema_version": "2.0"
+}

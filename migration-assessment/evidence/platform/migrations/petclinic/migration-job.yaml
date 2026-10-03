@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: petclinic-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+      containers:
+        - name: psql
+          image: postgres:17.6-alpine
+          command: ["sh", "-ec"]
+          args:
+            - |
+              for attempt in $(seq 1 60); do
+                pg_isready -q && break
+                sleep 5
+              done
+              pg_isready -q
+              psql -v ON_ERROR_STOP=1 -f /sql/schema.sql
+              psql -v ON_ERROR_STOP=1 -f /sql/data.sql
+          env:
+            - name: PGHOST
+              value: petclinic-db-rw.demo-app.svc.cluster.local
+            - name: PGDATABASE
+              value: petclinic
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: petclinic-db-app
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: petclinic-db-app
+                  key: password
+          volumeMounts:
+            - name: sql
+              mountPath: /sql
+              readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: sql
+          configMap:
+            name: petclinic-sql
